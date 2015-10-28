@@ -1,0 +1,39 @@
+daemon off;
+worker_processes 1;
+events { worker_connections 1024; }
+http {
+    sendfile on;
+    gzip              on;
+    gzip_http_version 1.0;
+    gzip_proxied      any;
+    gzip_min_length   500;
+    gzip_disable      "MSIE [1-6]\.";
+    gzip_types        text/plain text/xml text/css
+                      text/comma-separated-values
+                      text/javascript
+                      application/x-javascript
+                      application/atom+xml;
+upstream www.plujadepapers.cat {
+  server 104.236.27.119:8082;
+  server 104.236.255.143:8081;
+  server 104.236.27.119:8080;
+  server 104.236.255.143:8080;
+}
+server {
+  gzip_types text/plain text/css application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+  server_name www.plujadepapers.cat;
+  proxy_buffering off;
+  error_log /proc/self/fd/2;
+  access_log /proc/self/fd/1;
+  location / {
+    proxy_pass http://www.plujadepapers.cat;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # HTTP 1.1 support
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    }
+  }
+}
